@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": "tanahku",
+    "database": "auth_db",
+    "host": "34.101.99.221",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "tanahku",
+    "database": "auth_db",
+    "host": "34.101.99.221",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "tanahku",
+    "database": "auth_db",
+    "host": "34.101.99.221",
+    "dialect": "mysql"
+  }
+}
