@@ -2,6 +2,7 @@ require("dotenv").config();
 const { Plant } = require("../../../models");
 const Validator = require("fastest-validator");
 const v = new Validator();
+const { bucket } = require("../../../middleware/gcsStorage"); // Sesuaikan dengan path ke file konfigurasi GCS
 
 const plantSchema = {
   name: { type: "string", empty: false, max: 255 },
@@ -11,9 +12,8 @@ const plantSchema = {
 };
 
 module.exports = async (req, res) => {
-  const { body, file } = req;
+  const { body } = req;
 
-  // Validasi data masukan
   const validationResponse = v.validate(body, plantSchema);
 
   if (validationResponse !== true) {
@@ -28,18 +28,61 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const plant = await Plant.create({ ...body, image: file.filename });
-    return res.json({
-      code: 200,
-      status: "success",
-      data: {
-        name: plant.name,
-        image: plant.image,
-        description: plant.description,
-        latinName: plant.latinName,
-        soil: plant.soil,
-      },
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        code: 400,
+        status: "error",
+        data: {
+          error: "No file uploaded",
+        },
+      });
+    }
+    // const timestamp = new Date().toISOString().replace(/[-:]/g, "");
+    // const newFileName = `${timestamp}_${file.originalname}`;
+    // const blob = bucket.file(newFileName);
+    const blob = bucket.file(file.originalname);
+    const blobStream = blob.createWriteStream();
+
+    blobStream.on("error", (err) => {
+      console.error(err);
+      return res.status(500).json({
+        code: 500,
+        status: "error",
+        data: err.message,
+      });
     });
+
+    blobStream.on("finish", async () => {
+      // Setelah gambar berhasil diunggah ke GCS, simpan data tanaman ke database
+      try {
+        const plant = await Plant.create({
+          ...body,
+          image: `https://storage.googleapis.com/${bucket.name}/${blob.name}`,
+        });
+
+        return res.json({
+          code: 200,
+          status: "success",
+          data: {
+            name: plant.name,
+            image: plant.image,
+            description: plant.description,
+            latinName: plant.latinName,
+            soil: plant.soil,
+          },
+        });
+      } catch (error) {
+        return res.status(500).json({
+          code: 500,
+          status: "error",
+          data: error.message,
+        });
+      }
+    });
+
+    blobStream.end(file.buffer);
   } catch (error) {
     return res.status(500).json({
       code: 500,
