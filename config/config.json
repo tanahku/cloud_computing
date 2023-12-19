@@ -1,23 +1,23 @@
 {
   "development": {
     "username": "root",
-    "password": "",
-    "database": "express_capstone",
-    "host": "localhost",
+    "password": "root",
+    "database": "capstone_db",
+    "host": "34.30.21.113",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
-    "password": "tanahku",
-    "database": "auth_db",
-    "host": "34.101.99.221",
+    "password": "root",
+    "database": "capstone_db",
+    "host": "34.30.21.113",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
-    "password": "tanahku",
-    "database": "auth_db",
-    "host": "34.101.99.221",
+    "password": "root",
+    "database": "capstone_db",
+    "host": "34.30.21.113",
     "dialect": "mysql"
   }
 }
